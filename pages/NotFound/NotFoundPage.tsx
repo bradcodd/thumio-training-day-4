@@ -13,10 +13,10 @@ const NotFoundPage: React.FC = () => {
         <p className="text-6xl font-extrabold text-white">404</p>
         <p className="text-lg text-slate-400">The page you’re looking for doesn’t exist.</p>
         <Link
-          to="/"
+          to="/Studio"
           className="inline-flex items-center justify-center px-5 py-3 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-lg transition-colors"
         >
-          Go back home
+          Go back to Studio
         </Link>
       </div>
     </div>

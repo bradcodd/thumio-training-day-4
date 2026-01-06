@@ -1,0 +1,13 @@
+/* Base styles for Thumio Training Day 3 */
+/* Tailwind CSS is loaded from CDN, so this file is for any custom styles */
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+

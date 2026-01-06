@@ -1,0 +1,5 @@
+{
+  "name": "Thumio Training Day 3",
+  "description": "An interactive, chat-based thumbnail editor powered by AI. Upload an image and use simple text commands to edit it into the perfect 16:9 YouTube thumbnail.",
+  "requestFramePermissions": []
+}

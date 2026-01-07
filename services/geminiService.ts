@@ -1,5 +1,6 @@
 
 import { GoogleGenAI } from "@google/genai";
+import { debugLog, debugWarn, debugError } from '../utils/debugLogger';
 
 const getGoogleGenAI = async () => {
   let API_KEY: string | undefined;
@@ -8,7 +9,9 @@ const getGoogleGenAI = async () => {
   if (window.aistudio) {
     try {
       API_KEY = await window.aistudio.getApiKey();
+      debugLog('system', 'API key retrieved from AI Studio');
     } catch (error) {
+      debugWarn('system', "Failed to get API key from AI Studio:", error);
       console.warn("Failed to get API key from AI Studio:", error);
     }
   }
@@ -16,6 +19,9 @@ const getGoogleGenAI = async () => {
   // Fall back to environment variable for local development
   if (!API_KEY) {
     API_KEY = process.env.GEMINI_API_KEY;
+    if (API_KEY) {
+      debugLog('system', 'API key retrieved from environment variable');
+    }
   }
 
   if (!API_KEY) {
@@ -36,6 +42,9 @@ export const editImage = async (prompt: string, imageBase64: string, mimeType: s
     const ai = await getGoogleGenAI();
     //const model = 'gemini-2.5-flash-image';
     const model = 'gemini-2.5-flash-image';
+    
+    debugLog('system', 'Starting Gemini API call', { model, prompt: prompt.substring(0, 50), mimeType });
+    
     const imagePart = {
       inlineData: {
         data: imageBase64.split(',')[1], // remove the data:mime/type;base64, part
@@ -47,6 +56,7 @@ export const editImage = async (prompt: string, imageBase64: string, mimeType: s
       text: prompt,
     };
 
+    const startTime = Date.now();
     const response = await ai.models.generateContent({
       model: model,
       contents: { parts: [imagePart, textPart] },
@@ -57,6 +67,7 @@ export const editImage = async (prompt: string, imageBase64: string, mimeType: s
         }
       }
     });
+    const responseTime = Date.now() - startTime;
 
     if (!response.candidates || response.candidates.length === 0 || !response.candidates[0].content.parts) {
       throw new Error("Invalid response structure from Gemini API.");
@@ -71,12 +82,15 @@ export const editImage = async (prompt: string, imageBase64: string, mimeType: s
     const newMimeType = imageOutputPart.inlineData.mimeType;
     const newImageData = imageOutputPart.inlineData.data;
 
+    debugLog('system', 'Gemini API call completed', { responseTimeMs: responseTime, outputMimeType: newMimeType });
+
     return {
       newImageBase64: `data:${newMimeType};base64,${newImageData}`,
       newMimeType: newMimeType
     };
 
   } catch (error) {
+    debugError('system', "Error editing image with Gemini:", error);
     console.error("Error editing image with Gemini:", error);
     if (error instanceof Error) {
       throw error;

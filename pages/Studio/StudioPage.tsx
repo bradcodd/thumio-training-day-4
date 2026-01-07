@@ -16,6 +16,7 @@ import DownloadModal from '../../components/studio/DownloadModal';
 import ApiKeySelectionView from '../../components/studio/ApiKeySelectionView';
 import FeedbackModal from '../../components/studio/FeedbackModal';
 import { Crop, PixelCrop } from 'react-image-crop';
+import { debugLog, debugError } from '../../utils/debugLogger';
 
 interface ImageState {
   image: string;
@@ -85,6 +86,7 @@ const StudioPage: React.FC = () => {
     setError(null);
     setCurrentProjectId(null);
     try {
+      debugLog('ui', 'Image upload started', { fileName: file.name, fileType: file.type, fileSize: file.size });
       const base64String = await fileToBase64(file);
       setImageHistory([{ image: base64String, mimeType: file.type }]);
       setHistoryIndex(0);
@@ -95,9 +97,11 @@ const StudioPage: React.FC = () => {
           text: "Great! Your image is loaded. What's the first change you'd like to make?",
         },
       ]);
+      debugLog('ui', 'Image upload completed');
       // FIX: Added curly braces to the catch block to fix syntax error.
     } catch (err) {
       setError('Failed to upload image. Please try again.');
+      debugError('ui', 'Image upload failed', err);
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -111,6 +115,8 @@ const StudioPage: React.FC = () => {
       const userMessage: ChatMessage = { author: MessageAuthor.USER, text };
       setChatHistory(prev => [...prev, userMessage]);
     }
+
+    debugLog('chat', 'Sending message', { text: text.substring(0, 50), isQuickAction });
 
     setIsLoading(true);
     setError(null);
@@ -145,9 +151,11 @@ const StudioPage: React.FC = () => {
         image: newImageBase64,
       };
       setChatHistory(prev => [...prev, aiMessage]);
+      debugLog('chat', 'Message processed successfully', { responseText: aiResponseText.substring(0, 50) });
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+      debugError('chat', 'Message processing failed', { error: errorMessage, text: text.substring(0, 50) });
       if (errorMessage.includes('Requested entity was not found.')) {
         setError('Your selected API key is invalid. Please select a valid key to continue.');
         setChatHistory(prev => [...prev, { author: MessageAuthor.AI, text: 'Your selected API key is invalid. Please select a new one.' }]);
@@ -190,6 +198,7 @@ const StudioPage: React.FC = () => {
     if (!completedCrop || !imgRef.current || !imageMimeType) return;
 
     try {
+      debugLog('ui', 'Applying crop', { crop: completedCrop });
       const croppedImageBase64 = await getCroppedImg(imgRef.current, completedCrop, imageMimeType);
 
       const newHistory = imageHistory.slice(0, historyIndex + 1);
@@ -203,8 +212,10 @@ const StudioPage: React.FC = () => {
         text: "I've cropped the image. What would you like to do next?",
       };
       setChatHistory(prev => [...prev, aiMessage]);
+      debugLog('ui', 'Crop applied successfully');
 
     } catch (e) {
+      debugError('ui', 'Crop failed', e);
       console.error(e);
       setError("Failed to crop the image.");
     } finally {
@@ -253,6 +264,7 @@ const StudioPage: React.FC = () => {
 
       // --- Save/Update Project (uses original `currentImage`) ---
       if (currentProjectId) {
+        debugLog('projects', 'Updating existing project', { projectId: currentProjectId, filename });
         setProjects(prevProjects => {
           const updatedProjects = prevProjects.map(p =>
             p.id === currentProjectId
@@ -270,6 +282,7 @@ const StudioPage: React.FC = () => {
           mimeType: imageMimeType!,
           createdAt: Date.now()
         };
+        debugLog('projects', 'Creating new project', { projectId: newProject.id, filename });
         setProjects(prev => {
           const updatedProjects = [newProject, ...prev];
           saveProjects(updatedProjects);
@@ -278,6 +291,7 @@ const StudioPage: React.FC = () => {
         setCurrentProjectId(newProject.id);
       }
     } catch (err) {
+      debugError('projects', "Failed to process image for download:", err);
       console.error("Failed to process image for download:", err);
       setError("Failed to process image for download. Please try again.");
       setIsDownloadModalOpen(false);
@@ -311,6 +325,7 @@ const StudioPage: React.FC = () => {
   }, [canRedo]);
 
   const handleLoadProject = (project: Project) => {
+    debugLog('projects', 'Loading project', { projectId: project.id, projectName: project.name });
     const imageState = { image: project.imageData, mimeType: project.mimeType };
     setImageHistory([imageState]);
     setHistoryIndex(0);
@@ -324,6 +339,7 @@ const StudioPage: React.FC = () => {
   };
 
   const handleUpdateProject = (updatedProject: Project) => {
+    debugLog('projects', 'Updating project', { projectId: updatedProject.id, projectName: updatedProject.name });
     setProjects(prev => {
       const updatedProjects = prev.map(p => p.id === updatedProject.id ? updatedProject : p);
       saveProjects(updatedProjects);
@@ -332,6 +348,7 @@ const StudioPage: React.FC = () => {
   };
 
   const handleDeleteProject = (projectId: string) => {
+    debugLog('projects', 'Deleting project', { projectId });
     const updatedProjects = projects.filter(p => p.id !== projectId);
     setProjects(updatedProjects);
     saveProjects(updatedProjects);
@@ -346,7 +363,7 @@ const StudioPage: React.FC = () => {
   }
 
   const handleFeedbackSubmit = useCallback((feedbackData: any) => {
-    console.log("Feedback Submitted:", feedbackData);
+    debugLog('chat', "Feedback Submitted:", feedbackData);
     setChatHistory(prev => [
       ...prev,
       {

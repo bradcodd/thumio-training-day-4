@@ -39,8 +39,11 @@ This document lists all the prompts/requests made during this coding session.
    - Described its purpose: storing Firebase project configuration
    - Noted it should be committed to git (not in .gitignore)
 
-5. **"show all the prompts for this session save in file "PROMPTS_v4.md""**
+5. **"generate a file named "CHANGES_v4.md" and list all the changes made in this session"**
+    -- Created CHANGES_v4.md documenting this documentation session
+
+6. **"show all the prompts for this session save in file "PROMPTS_v4.md""**
    - This request
 
-6. **"commit this branch and push calling it "Firebase installed""**
+7. **"commit this branch and push calling it "Firebase installed""**
     - Next request

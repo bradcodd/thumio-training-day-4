@@ -74,3 +74,6 @@ This document lists all the prompts/requests made during this coding session.
 13. **" show all the prompts for this session save in file "PROMPTS_v3.md""**
     - This request
 
+14. **"commit this branch and push calling it "Day 4 Training""**
+    - Next request
+

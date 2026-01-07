@@ -71,9 +71,11 @@ This document lists all the prompts/requests made during this coding session.
     - Created `docs/feature-roadmap.md` with the feature template
     - Added roadmap sections for v1.0, v2.0, and future considerations
 
-13. **" show all the prompts for this session save in file "PROMPTS_v3.md""**
+13. **"show all the prompts for this session save in file "PROMPTS_v3.md""**
     - This request
 
 14. **"commit this branch and push calling it "Day 4 Training""**
     - Next request
 
+15. **"merge branch "backend" with "main"**
+    - Next request

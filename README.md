@@ -19,6 +19,11 @@ Brad Codd
 13. npm install
 14. npm run dev
 
+## Session setup
+
+1. firebase logout
+2. firebase login
+3. firebase use thumio-training
 
 ## History
 
